@@ -4,7 +4,7 @@ import plotly.express as px
 import plotly.graph_objects as go
 
 # Load data
-df = pd.read_csv(".../data/master_econ_data.csv")
+df = pd.read_csv("../data/master_econ_data.csv")
 df["date"] = pd.to_datetime(df["date"])
 
 # App title
@@ -18,7 +18,7 @@ indicators = st.sidebar.selectbox(
     ["cpi", "unemployment_rate", "gdp", "fed_funds_rate"]
 )
 
-# Date ranger filter
+# Date range filter
 start_date = st.sidebar.date_input("Start Date", df["date"].min())
 end_date = st.sidebar.date_input("End Date", df["date"].max())
 df_filtered = df[(df["date"] >= pd.to_datetime(start_date)) & (df["date"] <= pd.to_datetime(end_date))]
@@ -51,6 +51,5 @@ with col2:
 
 # Footer
 st.markdown("---")
-st.markdown("Data Soure: [FRED](https://fred.stlouisfed.org/)")
+st.markdown("Data Source: [FRED](https://fred.stlouisfed.org/)")
 st.markdown("Created by Nafeesa Hassanin - Economic Health Index")
-
