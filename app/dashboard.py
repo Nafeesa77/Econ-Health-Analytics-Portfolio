@@ -1,49 +1,42 @@
 import streamlit as st
 import pandas as pd
 import plotly.express as px
+import plotly.graph_objects as go
 
 # Load data
-df = pd.read_csv("../data/master_econ_data.csv")
+df = pd.read_csv(".../data/master_econ_data.csv")
 df["date"] = pd.to_datetime(df["date"])
 
 # App title
-st.title("Economic Dashboard (2024–Today)")
-st.write("Interactive dashboard showing CPI, Unemployment, GDP, and Fed Funds Rate.")
+st.title("Economic Dashboard (2024-Today)")
+st.write("Interactive dashboard showing CPI, Unemployment Rate, GDP, and Fed Funds Rate.")
 
-# Add dropdown 
+# Sidebar controls
 st.sidebar.title("Dashboard Controls")
-indicator = st.selectbox(
-    "Select an indicator:",
+indicators = st.sidebar.selectbox(
+    "Select an Indicator",
     ["cpi", "unemployment_rate", "gdp", "fed_funds_rate"]
 )
 
-# Add date range filter
-start_date = st.sidebar.date_input("Start date", df["date"].min())
-end_date = st.sidebar.date_input("End date", df["date"].max())
-
+# Date ranger filter
+start_date = st.sidebar.date_input("Start Date", df["date"].min())
+end_date = st.sidebar.date_input("End Date", df["date"].max())
 df_filtered = df[(df["date"] >= pd.to_datetime(start_date)) & (df["date"] <= pd.to_datetime(end_date))]
 
-# Create an interactive Plotly chart
-fig = px.line(df, x="date", y=indicator, title=f"{indicator.replace('_', ' ').title()} (2024–Today)")
+# Main indicator chart
+fig = px.line(df_filtered, x="date", y=indicators, title=f"{indicators.replace('_', ' ').title()} (Filtered)")
 st.plotly_chart(fig, use_container_width=True)
 
-# Add EHI
-st.subheader("Economic Health Index")
-
-fig_ehi = px.line(df, x="date", y="economic_health_index",
-                  title="Economic Health Index (2024–Today)")
-st.plotly_chart(fig_ehi)
-
-# Add KPI cards
+# KPI cards
 st.subheader("Key Metrics")
 kpi1, kpi2, kpi3, kpi4 = st.columns(4)
 
-kpi1.metric(label="CPI", value=f"{df_filtered['cpi'].iloc[-1]:.2f}")
-kpi2.metric(label="Unemployment Rate", value=f"{df_filtered['unemployment_rate'].iloc[-1]:.2f}%")
-kpi3.metric(label="GDP", value=f"${df_filtered['gdp'].iloc[-1]:,.2f}")
-kpi4.metric(label="Fed Funds Rate", value=f"{df_filtered['fed_funds_rate'].iloc[-1]:.2f}%")
+kpi1.metric(label="CPI", value=f"{df_filtered['cpi'].iloc[-1]:.2f}", delta=f"{df_filtered['cpi'].pct_change().iloc[-1]*100:.2f}%")
+kpi2.metric(label="Unemployment Rate", value=f"{df_filtered['unemployment_rate'].iloc[-1]:.2f}%", delta=f"{df_filtered['unemployment_rate'].pct_change().iloc[-1]*100:.2f}%")
+kpi3.metric(label="GDP", value=f"${df_filtered['gdp'].iloc[-1]:,.2f}", delta=f"{df_filtered['gdp'].pct_change().iloc[-1]*100:.2f}%")
+kpi4.metric(label="Fed Funds Rate", value=f"{df_filtered['fed_funds_rate'].iloc[-1]:.2f}%", delta=f"{df_filtered['fed_funds_rate'].pct_change().iloc[-1]*100:.2f}%")
 
-# Create a 2-collumn layout
+# Two column layout
 col1, col2 = st.columns(2)
 
 with col1:
@@ -52,13 +45,12 @@ with col1:
     st.plotly_chart(fig_ehi, use_container_width=True)
 
 with col2:
-    st.subheader("GDP vs Unempployment")
-    fig_indicator = px.line(df_filtered, x="date", y=["gpd", "unemployment_rate"])
-    st.plotly_chart(fig_indicator, use_container_width=True)
+    st.subheader("GDP vs Unemployment")
+    fig_combo = px.line(df_filtered, x="date", y=["gdp", "unemployment_rate"])
+    st.plotly_chart(fig_combo, use_container_width=True)
 
-    # Footer
-    st.markdown("---")
-    st.markdown("Data Source: [FRED](https://fred.stlouisfed.org/)")
-    st.markdown("Created by Nafeesa Hassanin - Economic Health Analytics Dashboard]")
-    
-                            
+# Footer
+st.markdown("---")
+st.markdown("Data Soure: [FRED](https://fred.stlouisfed.org/)")
+st.markdown("Created by Nafeesa Hassanin - Economic Health Index")
+
